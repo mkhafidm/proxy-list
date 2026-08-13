@@ -38,6 +38,15 @@ def main():
     for proxy in valid_proxies:
         proxy = proxy.strip()
         proxy = proxy.replace("http://", "").replace("https://", "")
+
+        # Skip proxy with SOCKS port
+        try:
+            port = proxy.split(":")[-1]
+            if port in ["1080", "1081", "1085", "1086", "1088", "9050"]:
+                continue
+        except:
+            pass
+
         if proxy and proxy not in seen:
             seen.add(proxy)
             cleaned_valid.append(proxy)

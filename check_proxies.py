@@ -38,7 +38,7 @@ def check_proxy(path):
                 )
                 elapsed_time = time.time() - start_time
                 
-                if response.status_code == 200 and elapsed_time < 3.0:
+                if response.status_code == 200 and elapsed_time < 5.0:
                     valid_proxies.append(proxy)
             except:
                 pass
