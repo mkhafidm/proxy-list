@@ -1,5 +1,8 @@
 name: Update Proxy List
 
+permissions:
+  contents: write
+  
 on:
   schedule:
   # 00:00 UTC (07:00 WIB)
