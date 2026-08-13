@@ -1,6 +1,7 @@
 import threading
 import requests
 import queue
+import time
 from tqdm import tqdm  
 
 def check_proxy(path):
@@ -28,14 +29,17 @@ def check_proxy(path):
             else:
                 proxy_url = proxy
             
+            start_time = time.time()
             try:
                 response = requests.get(
                     "https://httpbin.org/ip",
                     proxies={"http": proxy_url, "https": proxy_url},
                     timeout=5
                 )
-                if response.status_code == 200:
-                    valid_proxies.append(proxy) 
+                elapsed_time = time.time() - start_time
+                
+                if response.status_code == 200 and elapsed_time < 3.0:
+                    valid_proxies.append(proxy)
             except:
                 pass
             finally:
