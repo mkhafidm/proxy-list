@@ -18,10 +18,24 @@ def check_proxy(path):
         """Worker function to check proxy validity."""
         while not q.empty():
             proxy = q.get()
+            proxy = proxy.strip()
+            if not proxy:
+                progress_bar.update(1)
+                continue
+
+            if not proxy.startswith("http://") and not proxy.startswith("https://"):
+                proxy_url = f"http://{proxy}"
+            else:
+                proxy_url = proxy
+            
             try:
-                response = requests.get("https://httpbin.org/ip", proxies={"http": proxy, "https": proxy}, timeout=5)
+                response = requests.get(
+                    "https://httpbin.org/ip",
+                    proxies={"http": proxy_url, "https": proxy_url},
+                    timeout=5
+                )
                 if response.status_code == 200:
-                    valid_proxies.append(proxy)
+                    valid_proxies.append(proxy) 
             except:
                 pass
             finally:

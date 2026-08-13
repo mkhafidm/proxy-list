@@ -1,50 +1,62 @@
-name: Daily Fetch Cron Job
+name: Update Proxy List
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs daily at midnight UTC
-  workflow_dispatch: # Allows manual triggering
+  # 00:00 UTC (07:00 WIB)
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
-  daily-job:
+  update-proxy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # Setup Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Run script
+      # Run script
+      - name: Run proxy checker
         run: |
           python main.py
 
+      # Upload full proxy list as artifact
+      - name: Upload proxy lists as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-lists
+          path: output/
+
+      # Create file timestamp
+      - name: Create timestamp file
+        run: |
+          echo "Last update: $(date '+%Y-%m-%d %H:%M:%S WIB')" > last_update.txt
+          echo "Total proxies: $(cat output/valid_proxies.txt | wc -l)" >> last_update.txt
+
+      # Config Git identity
       - name: Configure Git
         run: |
-          git config --local user.email "sabiyyuhakim@gmail.com"
-          git config --local user.name "SulthanAbiyyu"
+          git config --local user.email "146152744+mkhafidm@users.noreply.github.com"
+          git config --local user.name "mkhafidm"
 
-      - name: Add and commit changes
+      # Commit & push file timestamp + preview proxy
+      - name: Commit and push changes
         run: |
-          git add valid_proxies.txt
-          STATUS=$(git status --porcelain | wc -l)
-          echo "number of files that need to be committed: $STATUS"
-          if [ $STATUS -gt 0 ]; then
-            now=$(date)
-            git commit -m "Auto Commit $now"
-          else
+          git add last_update.txt valid_proxies_preview.txt
+          if git diff --staged --quiet; then
             echo "No changes to commit."
+          else
+            now=$(date '+%Y-%m-%d %H:%M')
+            git commit -m "Auto sync proxy list - $now"
+            git push
           fi
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
