@@ -2,11 +2,10 @@ name: Update Proxy List
 
 permissions:
   contents: write
-  
+
 on:
   schedule:
-  # 00:00 UTC (07:00 WIB)
-    - cron: "0 0 * * *"
+    - cron: "4 22 * * *"   # 22:04 UTC = 05:04 WIB
   workflow_dispatch:
 
 jobs:
